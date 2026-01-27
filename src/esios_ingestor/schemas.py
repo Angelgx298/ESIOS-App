@@ -1,6 +1,6 @@
 from datetime import datetime
-from typing import List
 from pydantic import BaseModel
+
 
 class EsiosValue(BaseModel):
     value: float
@@ -10,6 +10,7 @@ class EsiosValue(BaseModel):
     geo_id: int
     geo_name: str
 
+
 class EsiosIndicator(BaseModel):
     name: str
     short_name: str
@@ -17,7 +18,8 @@ class EsiosIndicator(BaseModel):
     composited: bool
     step_type: str
     disaggregated: bool
-    values: List[EsiosValue]
+    values: list[EsiosValue]  # <-- Cambiado a minúscula
+
 
 class EsiosResponse(BaseModel):
     indicator: EsiosIndicator

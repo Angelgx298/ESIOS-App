@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from typing import List, Optional
+from typing import Optional
 from datetime import datetime
 from pydantic import ConfigDict
 
@@ -17,12 +17,13 @@ class PriceResponse(BaseModel):
     zone_id: int
     model_config = ConfigDict(from_attributes=True)
 
-@router.get("/prices", response_model=List[PriceResponse])
+@router.get("/prices", response_model=list[PriceResponse])
 async def get_prices(
     limit: int = Query(24, ge=1, le=168),
     start_date: Optional[datetime] = None,
     db: AsyncSession = Depends(get_db)
 ):
+
     """
     Get electricity prices.
     By default returns the latest prices.
