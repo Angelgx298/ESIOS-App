@@ -19,7 +19,8 @@ services:
   api:
     build: .
     volumes:
-      - ./src:/app/src
+      - .:/app
+      - /app/.venv
     environment:
       - POSTGRES_HOST=db
       - POSTGRES_PORT=5432

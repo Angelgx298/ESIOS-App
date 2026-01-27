@@ -18,5 +18,5 @@ prices: ## Show latest prices from CLI
 logs: ## View logs
 	docker-compose logs -f
 
-test: ## Run tests
-	uv run pytest
+test: ## Run the test suite
+	docker-compose run --rm api uv run pytest tests/ -v

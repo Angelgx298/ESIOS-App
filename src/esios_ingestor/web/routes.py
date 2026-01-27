@@ -3,6 +3,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import List, Optional
 from datetime import datetime
+from pydantic import ConfigDict
 
 from esios_ingestor.core.database import get_db
 from esios_ingestor.models.price import ElectricityPrice
@@ -14,9 +15,7 @@ class PriceResponse(BaseModel):
     timestamp: datetime
     price: float
     zone_id: int
-
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 @router.get("/prices", response_model=List[PriceResponse])
 async def get_prices(
