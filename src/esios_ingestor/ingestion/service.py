@@ -65,3 +65,4 @@ async def ingest_data():
 
     except Exception:
         logger.error("Ingestion process failed.", exc_info=True)
+        raise
