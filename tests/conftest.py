@@ -5,12 +5,29 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import NullPool
 
 from esios_ingestor.core.config import settings
-from esios_ingestor.core.database import get_db
+from esios_ingestor.core.database import Base, get_db
 from esios_ingestor.web.app import app
 
-test_engine = create_async_engine(settings.DATABASE_URL, echo=False, poolclass=NullPool)
+test_engine = create_async_engine(
+    settings.DATABASE_URL, echo=False, poolclass=NullPool
+)
 
 TestingSessionLocal = sessionmaker(test_engine, class_=AsyncSession, expire_on_commit=False)
+
+
+@pytest.fixture(scope="session", autouse=True)
+async def setup_database():
+    """
+    Creates database tables before all tests and drops them after.
+    Runs once per test session.
+    """
+    async with test_engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
+    
+    yield
+    
+    async with test_engine.begin() as conn:
+        await conn.run_sync(Base.metadata.drop_all)
 
 
 @pytest.fixture(scope="function")
