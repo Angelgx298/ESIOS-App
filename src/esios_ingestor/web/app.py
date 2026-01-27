@@ -1,14 +1,15 @@
+import logging
 from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 from tenacity import retry, stop_after_attempt, wait_fixed
-import logging
 
+from esios_ingestor.core.database import Base, engine
 from esios_ingestor.core.logger import setup_logging
-from esios_ingestor.core.database import engine, Base
-from esios_ingestor.models.price import ElectricityPrice 
 from esios_ingestor.web.routes import router as prices_router
 
 logger = logging.getLogger(__name__)
+
 
 @retry(stop=stop_after_attempt(5), wait=wait_fixed(2))
 async def init_db():
@@ -17,23 +18,26 @@ async def init_db():
         await conn.run_sync(Base.metadata.create_all)
     logger.info("Database tables verified.")
 
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     setup_logging()
-    
+
     try:
         await init_db()
     except Exception as e:
         logger.error("Critical: Database connection failed.", exc_info=True)
         raise e
-    
+
     yield
-    
+
     await engine.dispose()
+
 
 app = FastAPI(title="Esios Ingestor API", lifespan=lifespan)
 
 app.include_router(prices_router)
+
 
 @app.get("/health")
 async def health_check():

@@ -15,11 +15,11 @@ async def test_health_check(client: AsyncClient):
 async def test_get_prices_structure(client: AsyncClient):
     limit = 3
     response = await client.get(f"/prices?limit={limit}")
-    
+
     assert response.status_code == 200
     data = response.json()
     assert isinstance(data, list)
-    
+
     if len(data) > 0:
         assert len(data) <= limit
         first_item = data[0]

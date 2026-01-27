@@ -9,9 +9,9 @@ class Settings(BaseSettings):
     POSTGRES_DB: str = "esios_db"
     POSTGRES_HOST: str = "localhost"
     POSTGRES_PORT: int = 5432
-    
-    ESIOS_API_KEY: str 
-    
+
+    ESIOS_API_KEY: str
+
     LOG_LEVEL: str = "INFO"
 
     @property

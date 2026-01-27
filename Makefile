@@ -20,3 +20,12 @@ logs: ## View logs
 
 test: ## Run the test suite
 	docker-compose run --rm api uv run pytest tests/ -v
+
+lint: ## Run code linter (Ruff)
+	docker-compose run --rm api uv run ruff check src/ tests/
+
+format: ## Auto-format code with Ruff
+	docker-compose run --rm api uv run ruff format src/ tests/
+
+format-check: ## Check if code is formatted
+	docker-compose run --rm api uv run ruff format --check src/ tests/
