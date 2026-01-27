@@ -6,7 +6,9 @@ from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_excep
 from esios_ingestor.core.config import settings
 from esios_ingestor.schemas import EsiosResponse
 
+
 logger = logging.getLogger(__name__)
+
 
 class EsiosClient:
     BASE_URL = "https://api.esios.ree.es"
@@ -25,14 +27,10 @@ class EsiosClient:
         retry=retry_if_exception_type((httpx.ConnectError, httpx.TimeoutException, httpx.HTTPStatusError))
     )
     async def fetch_prices(self, start_date: datetime, end_date: datetime) -> EsiosResponse | None:
-        """
-        Fetches prices for a given date range.
-        Returns None if no data is available (empty values), raises exception on API error.
-        """
         params = {
             "start_date": start_date.isoformat(),
             "end_date": end_date.isoformat(),
-            "geo_ids[]": [8741] # Peninsula
+            "geo_ids[]": [8741]
         }
         
         timeout = httpx.Timeout(10.0, connect=5.0)
@@ -49,7 +47,6 @@ class EsiosClient:
                 response.raise_for_status()
                 
                 data = response.json()
-                
                 validated_data = EsiosResponse(**data)
                 
                 if not validated_data.indicator.values:

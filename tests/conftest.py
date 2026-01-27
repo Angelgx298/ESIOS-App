@@ -8,11 +8,10 @@ from esios_ingestor.core.config import settings
 from esios_ingestor.core.database import get_db
 from esios_ingestor.web.app import app
 
-# Create a separate engine for tests with NullPool to avoid event loop conflicts
 test_engine = create_async_engine(
     settings.DATABASE_URL,
     echo=False,
-    poolclass=NullPool  # Critical: No connection pooling during tests
+    poolclass=NullPool
 )
 
 TestingSessionLocal = sessionmaker(
@@ -35,7 +34,6 @@ async def client(db_session):
     Creates an async HTTP client for testing the FastAPI app.
     Overrides the database dependency to use the test session.
     """
-    # Override FastAPI dependency injection
     async def override_get_db():
         yield db_session
     
@@ -47,5 +45,4 @@ async def client(db_session):
     ) as ac:
         yield ac
     
-    # Cleanup
     app.dependency_overrides.clear()
