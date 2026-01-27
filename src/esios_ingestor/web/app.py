@@ -6,6 +6,7 @@ import logging
 from esios_ingestor.core.logger import setup_logging
 from esios_ingestor.core.database import engine, Base
 from esios_ingestor.models.price import ElectricityPrice 
+from esios_ingestor.web.routes import router as prices_router
 
 logger = logging.getLogger(__name__)
 
@@ -31,6 +32,8 @@ async def lifespan(app: FastAPI):
     await engine.dispose()
 
 app = FastAPI(title="Esios Ingestor API", lifespan=lifespan)
+
+app.include_router(prices_router)
 
 @app.get("/health")
 async def health_check():
