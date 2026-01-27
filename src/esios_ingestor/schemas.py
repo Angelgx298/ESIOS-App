@@ -19,7 +19,7 @@ class EsiosIndicator(BaseModel):
     composited: bool
     step_type: str
     disaggregated: bool
-    values: list[EsiosValue]  # <-- Cambiado a minúscula
+    values: list[EsiosValue]
 
 
 class EsiosResponse(BaseModel):

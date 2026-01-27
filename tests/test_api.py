@@ -33,3 +33,28 @@ async def test_get_prices_pagination(client: AsyncClient):
     response = await client.get("/prices?limit=1")
     assert response.status_code == 200
     assert len(response.json()) <= 1
+
+
+async def test_price_statistics(client: AsyncClient):
+    """
+    Test that /prices/stats returns aggregated statistics.
+    """
+    response = await client.get("/prices/stats?days=7")
+
+    assert response.status_code == 200
+    data = response.json()
+
+    assert "period" in data
+    assert "avg_price" in data
+    assert "max_price" in data
+    assert "min_price" in data
+    assert "peak_hour" in data
+    assert "cheapest_hour" in data
+
+    if data["avg_price"] is not None:
+        assert isinstance(data["avg_price"], (int, float))
+        assert isinstance(data["max_price"], (int, float))
+        assert isinstance(data["min_price"], (int, float))
+
+        if data["peak_hour"] is not None:
+            assert 0 <= data["peak_hour"] <= 23
