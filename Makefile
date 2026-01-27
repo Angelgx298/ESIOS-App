@@ -12,6 +12,9 @@ down: ## Stop infrastructure
 ingest: ## Run ETL pipeline manually
 	docker-compose run --rm api esios ingest
 
+prices: ## Show latest prices from CLI
+	docker-compose run --rm api esios prices
+
 logs: ## View logs
 	docker-compose logs -f
 
