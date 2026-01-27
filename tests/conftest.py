@@ -8,9 +8,7 @@ from esios_ingestor.core.config import settings
 from esios_ingestor.core.database import Base, get_db
 from esios_ingestor.web.app import app
 
-test_engine = create_async_engine(
-    settings.DATABASE_URL, echo=False, poolclass=NullPool
-)
+test_engine = create_async_engine(settings.DATABASE_URL, echo=False, poolclass=NullPool)
 
 TestingSessionLocal = sessionmaker(test_engine, class_=AsyncSession, expire_on_commit=False)
 
@@ -23,9 +21,9 @@ async def setup_database():
     """
     async with test_engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
-    
+
     yield
-    
+
     async with test_engine.begin() as conn:
         await conn.run_sync(Base.metadata.drop_all)
 
