@@ -1,8 +1,8 @@
-from datetime import datetime
+from datetime import UTC, datetime, timedelta
 
 from fastapi import APIRouter, Depends, Query
 from pydantic import BaseModel, ConfigDict
-from sqlalchemy import select
+from sqlalchemy import extract, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from esios_ingestor.core.database import get_db
@@ -56,10 +56,6 @@ async def get_price_stats(
         - peak_hour: Hour of day (0-23) with highest average price
         - cheapest_hour: Hour of day (0-23) with lowest average price
     """
-    from datetime import UTC, datetime, timedelta
-
-    from sqlalchemy import extract, func
-
     cutoff_date = datetime.now(UTC) - timedelta(days=days)
 
     stats_query = select(
