@@ -3,9 +3,9 @@ from datetime import datetime, timedelta, timezone
 from sqlalchemy import func
 from sqlalchemy.dialects.postgresql import insert
 
-from src.esios_ingestor.core.database import AsyncSessionLocal
-from src.esios_ingestor.models.price import ElectricityPrice
-from src.esios_ingestor.ingestion.client import EsiosClient
+from esios_ingestor.core.database import AsyncSessionLocal
+from esios_ingestor.models.price import ElectricityPrice
+from esios_ingestor.ingestion.client import EsiosClient
 
 logger = logging.getLogger(__name__)
 

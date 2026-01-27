@@ -3,9 +3,9 @@ from fastapi import FastAPI
 from tenacity import retry, stop_after_attempt, wait_fixed
 import logging
 
-from src.esios_ingestor.core.logger import setup_logging
-from src.esios_ingestor.core.database import engine, Base
-from src.esios_ingestor.models.price import ElectricityPrice 
+from esios_ingestor.core.logger import setup_logging
+from esios_ingestor.core.database import engine, Base
+from esios_ingestor.models.price import ElectricityPrice 
 
 logger = logging.getLogger(__name__)
 

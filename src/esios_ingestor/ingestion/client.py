@@ -3,8 +3,8 @@ import logging
 from datetime import datetime
 from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_exception_type
 
-from src.esios_ingestor.core.config import settings
-from src.esios_ingestor.schemas import EsiosResponse
+from esios_ingestor.core.config import settings
+from esios_ingestor.schemas import EsiosResponse
 
 logger = logging.getLogger(__name__)
 

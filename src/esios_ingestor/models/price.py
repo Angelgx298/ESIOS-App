@@ -1,7 +1,7 @@
 from datetime import datetime
 from sqlalchemy import Float, Integer, DateTime, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column
-from src.esios_ingestor.core.database import Base
+from esios_ingestor.core.database import Base
 
 class ElectricityPrice(Base):
     __tablename__ = "electricity_prices"

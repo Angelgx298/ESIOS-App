@@ -1,6 +1,6 @@
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
 from sqlalchemy.orm import DeclarativeBase
-from src.esios_ingestor.core.config import settings
+from esios_ingestor.core.config import settings
 
 engine = create_async_engine(
     settings.DATABASE_URL,

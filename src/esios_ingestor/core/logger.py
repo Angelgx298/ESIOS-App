@@ -1,6 +1,6 @@
 import logging
 import sys
-from src.esios_ingestor.core.config import settings
+from esios_ingestor.core.config import settings
 
 def setup_logging():
     """Configures the root logger to output JSON-like structure or simple text."""
