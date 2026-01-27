@@ -1,6 +1,6 @@
 # ESIOS Electricity Price Ingestor
 
-[![CI/CD Pipeline](https://github.com/Angelgx298/ESIOS-App/actions/workflows/ci.yml/badge.svg)](https://github.com/TU_USUARIO/ESIOS-App/actions)
+[![CI/CD Pipeline](https://github.com/Angelgx298/ESIOS-App/actions/workflows/ci.yml/badge.svg)](https://github.com/Angelgx298/ESIOS-App/actions)
 
 ETL pipeline and REST API for ingesting electricity prices from the Spanish electricity market operator (ESIOS). Built with Python 3.12, FastAPI, and PostgreSQL.
 
@@ -29,24 +29,24 @@ ETL pipeline and REST API for ingesting electricity prices from the Spanish elec
 
 ## Technical Stack
 
-| Component        | Technology            | Rationale |
-|------------------|-----------------------|-----------|
-| Language         | Python 3.12           | Type hints, performance improvements |
-| Package Manager  | uv                    | 10-100x faster than pip, deterministic builds |
-| Web Framework    | FastAPI               | Async-native, auto-generated OpenAPI docs |
-| Database         | PostgreSQL 16         | ACID compliance, advanced indexing |
-| ORM              | SQLAlchemy (async)    | Non-blocking I/O for concurrent requests |
-| Validation       | Pydantic V2           | Runtime type checking, data contracts |
-| Testing          | pytest + httpx        | Async test support, integration tests |
-| Containerization | Docker Compose        | Reproducible development environment |
-| CI/CD            | GitHub Actions        | Automated linting and testing |
+| Component        | Technology         | Rationale                                     |
+| ---------------- | ------------------ | --------------------------------------------- |
+| Language         | Python 3.12        | Type hints, performance improvements          |
+| Package Manager  | uv                 | 10-100x faster than pip, deterministic builds |
+| Web Framework    | FastAPI            | Async-native, auto-generated OpenAPI docs     |
+| Database         | PostgreSQL 16      | ACID compliance, advanced indexing            |
+| ORM              | SQLAlchemy (async) | Non-blocking I/O for concurrent requests      |
+| Validation       | Pydantic V2        | Runtime type checking, data contracts         |
+| Testing          | pytest + httpx     | Async test support, integration tests         |
+| Containerization | Docker Compose     | Reproducible development environment          |
+| CI/CD            | GitHub Actions     | Automated linting and testing                 |
 
 ## Quick Start
 
 ### Prerequisites
 
 - Docker and Docker Compose  
-- ESIOS API Token (register here)  
+- [ API Key](https://api.esios.ree.es/)
 
 ### Setup
 
