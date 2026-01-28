@@ -21,13 +21,37 @@ logger = logging.getLogger(__name__)
 
 
 @app.command()
-def ingest():
+def ingest(
+    start_date: str = typer.Option(None, help="Start date (YYYY-MM-DD)"),
+    end_date: str = typer.Option(None, help="End date (YYYY-MM-DD)"),
+):
     """
     Triggers the ETL pipeline to fetch and store electricity prices.
+
+    Without dates: auto-detects gaps and fetches missing data.
+    With dates: fetches specific range.
     """
     logger.info("Starting ingestion process from CLI...")
+
+    start_dt = None
+    end_dt = None
+
+    if start_date:
+        try:
+            start_dt = datetime.strptime(start_date, "%Y-%m-%d")
+        except ValueError as e:
+            console.print("[red]Invalid start date format. Use YYYY-MM-DD[/red]")
+            raise typer.Exit(code=1) from e
+
+    if end_date:
+        try:
+            end_dt = datetime.strptime(end_date, "%Y-%m-%d")
+        except ValueError as e:
+            console.print("[red]Invalid end date format. Use YYYY-MM-DD[/red]")
+            raise typer.Exit(code=1) from e
+
     try:
-        asyncio.run(ingest_data())
+        asyncio.run(ingest_data(start_dt, end_dt))
         logger.info("Ingestion process finished successfully.")
     except Exception as e:
         logger.error(f"Ingestion failed: {e}")
@@ -36,9 +60,7 @@ def ingest():
 
 @app.command()
 def server(host: str = "0.0.0.0", port: int = 8000, reload: bool = False):
-    """
-    Starts the FastAPI web server.
-    """
+    """Starts the FastAPI web server."""
     logger.info(f"Starting API server on {host}:{port}")
     uvicorn.run("esios_ingestor.web.app:app", host=host, port=port, reload=reload)
 
@@ -48,9 +70,7 @@ def prices(
     limit: int = typer.Option(10, help="Number of prices to show"),
     date: str = typer.Option(None, help="Filter by date (YYYY-MM-DD)"),
 ):
-    """
-    Show electricity prices from the database in a table.
-    """
+    """Show electricity prices from the database in a table."""
 
     async def _get_prices():
         async with AsyncSessionLocal() as session:
@@ -58,11 +78,11 @@ def prices(
 
             if date:
                 try:
-                    # Filter for specific day (00:00 to 23:59)
                     start_dt = datetime.strptime(date, "%Y-%m-%d")
                     end_dt = start_dt.replace(hour=23, minute=59, second=59)
                     query = query.where(
-                        ElectricityPrice.timestamp >= start_dt, ElectricityPrice.timestamp <= end_dt
+                        ElectricityPrice.timestamp >= start_dt,
+                        ElectricityPrice.timestamp <= end_dt,
                     )
                 except ValueError:
                     console.print("[red]Invalid date format. Use YYYY-MM-DD[/red]")
