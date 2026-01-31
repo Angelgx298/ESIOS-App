@@ -23,6 +23,13 @@ ETL pipeline and REST API for ingesting electricity prices from the Spanish elec
 * `/health` – Service health check (verifies database connectivity, returns 503 if DB is down)
 * `/ready` – Readiness probe for orchestrators (Kubernetes, Docker Swarm)
 
+### Production Readiness
+
+* **Graceful shutdown** – Proper resource cleanup on SIGTERM with 30s timeout for in-flight requests
+* **Connection pooling** – SQLAlchemy pool configuration (size=10, max_overflow=20) for high concurrency
+* **Health checks** – Real database connectivity verification with appropriate HTTP status codes
+* **Structured logging** – Application lifecycle events (startup/shutdown) for observability
+
 ### CLI Interface
 
 * `esios ingest` – Trigger ETL pipeline
@@ -199,6 +206,9 @@ esios-app/
 * **Async SQLAlchemy** for higher concurrency
 * **Tenacity retries** with exponential backoff
 * **UTC timestamps** to avoid timezone bugs
+* **Graceful shutdown** – 30s timeout allows in-flight requests to complete, proper connection pool cleanup
+* **Connection pooling** – Configured pool size and overflow limits prevent resource exhaustion under load
+* **Separate /health and /ready endpoints** – Health for liveness (is app running?), ready for readiness (can it serve traffic?)
 
 ## Makefile Commands
 

@@ -23,17 +23,23 @@ async def init_db():
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    """Manage application lifespan with graceful startup and shutdown."""
     setup_logging()
+    logger.info("Application starting up...")
 
     try:
         await init_db()
+        logger.info("Application startup complete")
     except Exception as e:
         logger.error("Critical: Database connection failed.", exc_info=True)
         raise e
 
     yield
 
+    # Graceful shutdown sequence
+    logger.info("Shutting down application...")
     await engine.dispose()
+    logger.info("Graceful shutdown complete")
 
 
 app = FastAPI(title="Esios Ingestor API", lifespan=lifespan)

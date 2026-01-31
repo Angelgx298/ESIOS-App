@@ -35,7 +35,13 @@ services:
     depends_on:
       db:
         condition: service_healthy
-    command: uvicorn esios_ingestor.web.app:app --host 0.0.0.0 --port 8000 --reload
+    command: >
+      uvicorn esios_ingestor.web.app:app 
+      --host 0.0.0.0 
+      --port 8000 
+      --timeout-graceful-shutdown 30
+      --lifespan on
+      --reload
 
 volumes:
   postgres_data:
