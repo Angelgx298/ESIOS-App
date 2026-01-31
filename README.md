@@ -20,7 +20,8 @@ ETL pipeline and REST API for ingesting electricity prices from the Spanish elec
 
 * `/prices` – Query electricity prices with pagination
 * `/prices/stats` – Aggregated analytics (avg, max, min, peak hours)
-* `/health` – Service health check
+* `/health` – Service health check (verifies database connectivity, returns 503 if DB is down)
+* `/ready` – Readiness probe for orchestrators (Kubernetes, Docker Swarm)
 
 ### CLI Interface
 
@@ -69,9 +70,11 @@ open http://localhost:8000/docs
 ```bash
 curl "http://localhost:8000/prices?limit=24"
 curl "http://localhost:8000/prices/stats?days=7"
+curl "http://localhost:8000/health"
+curl "http://localhost:8000/ready"
 ```
 
-**Response:**
+**Prices Response:**
 
 ```json
 {
@@ -81,6 +84,27 @@ curl "http://localhost:8000/prices/stats?days=7"
   "min_price": 54.84,
   "peak_hour": 19,
   "cheapest_hour": 3
+}
+```
+
+**Health Check Response (healthy):**
+
+```json
+{
+  "status": "healthy",
+  "database": "connected",
+  "service": "esios-ingestor"
+}
+```
+
+**Health Check Response (unhealthy - HTTP 503):**
+
+```json
+{
+  "detail": {
+    "status": "unhealthy",
+    "database": "disconnected"
+  }
 }
 ```
 

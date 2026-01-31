@@ -1,10 +1,12 @@
 import logging
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI
+from fastapi import Depends, FastAPI, HTTPException
+from sqlalchemy import text
+from sqlalchemy.ext.asyncio import AsyncSession
 from tenacity import retry, stop_after_attempt, wait_fixed
 
-from esios_ingestor.core.database import Base, engine
+from esios_ingestor.core.database import Base, engine, get_db
 from esios_ingestor.core.logger import setup_logging
 from esios_ingestor.web.routes import router as prices_router
 
@@ -40,6 +42,28 @@ app.include_router(prices_router)
 
 
 @app.get("/health")
-async def health_check():
-    """Simple health check to verify the app is running."""
-    return {"status": "ok", "service": "esios-ingestor"}
+async def health_check(db: AsyncSession = Depends(get_db)):
+    """
+    Health check endpoint that verifies database connectivity.
+    Returns 200 if healthy, 503 if database is unreachable.
+    """
+    try:
+        await db.execute(text("SELECT 1"))
+        return {"status": "healthy", "database": "connected", "service": "esios-ingestor"}
+    except Exception:
+        raise HTTPException(
+            status_code=503, detail={"status": "unhealthy", "database": "disconnected"}
+        ) from None
+
+
+@app.get("/ready")
+async def readiness_check(db: AsyncSession = Depends(get_db)):
+    """
+    Readiness probe for orchestrators (Kubernetes, Docker Swarm).
+    Returns 200 when ready to receive traffic, 503 otherwise.
+    """
+    try:
+        await db.execute(text("SELECT 1"))
+        return {"ready": True}
+    except Exception:
+        raise HTTPException(status_code=503, detail={"ready": False}) from None
