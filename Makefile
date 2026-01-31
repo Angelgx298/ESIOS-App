@@ -54,7 +54,7 @@ db-clean: ## Delete all data (keeps schema)
 
 db-stats: ## Show database statistics
 	@echo "Database statistics:"
-	@docker exec -it esios-app-db-1 psql -U esios -d esios_db -c "\
+	@docker exec -i esios-app-db-1 psql -U esios -d esios_db -c "\
 		SELECT \
 			COUNT(*) as total_records, \
 			MIN(timestamp) as earliest_data, \

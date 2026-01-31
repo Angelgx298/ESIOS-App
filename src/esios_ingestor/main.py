@@ -50,6 +50,10 @@ def ingest(
             console.print("[red]Invalid end date format. Use YYYY-MM-DD[/red]")
             raise typer.Exit(code=1) from e
 
+    if start_dt and end_dt and start_dt > end_dt:
+        console.print("[red]Error: start_date must be before or equal to end_date[/red]")
+        raise typer.Exit(code=1)
+
     try:
         asyncio.run(ingest_data(start_dt, end_dt))
         logger.info("Ingestion process finished successfully.")
