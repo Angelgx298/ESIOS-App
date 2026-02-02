@@ -5,6 +5,7 @@ from sqlalchemy import func
 from sqlalchemy.dialects.postgresql import insert
 
 from esios_ingestor.core.database import AsyncSessionLocal
+from esios_ingestor.core.metrics import INGESTION_RECORDS_TOTAL, update_last_success_timestamp
 from esios_ingestor.ingestion.client import EsiosClient
 from esios_ingestor.models.price import ElectricityPrice
 
@@ -51,32 +52,44 @@ async def ingest_data(start_date: datetime | None = None, end_date: datetime | N
                 logger.info("Data is up to date.")
                 return
 
+    api_call_successful = False
+
     try:
         esios_data = await client.fetch_prices(target_start, target_end)
+        api_call_successful = True
 
         if not esios_data:
-            logger.info("No new data received from API.")
-            return
+            logger.info("No new data received from API (up to date).")
+        else:
+            async with AsyncSessionLocal() as session:
+                records_count = 0
 
-        async with AsyncSessionLocal() as session:
-            records_count = 0
-
-            for item in esios_data.indicator.values:
-                stmt = (
-                    insert(ElectricityPrice)
-                    .values(
-                        timestamp=item.datetime_utc,
-                        price=item.value,
-                        zone_id=item.geo_id,
+                for item in esios_data.indicator.values:
+                    stmt = (
+                        insert(ElectricityPrice)
+                        .values(
+                            timestamp=item.datetime_utc,
+                            price=item.value,
+                            zone_id=item.geo_id,
+                        )
+                        .on_conflict_do_nothing(index_elements=["timestamp", "zone_id"])
                     )
-                    .on_conflict_do_nothing(index_elements=["timestamp", "zone_id"])
-                )
 
-                await session.execute(stmt)
-                records_count += 1
+                    await session.execute(stmt)
+                    records_count += 1
 
-            await session.commit()
-            logger.info(f"Ingestion complete. Processed {records_count} records.")
+                await session.commit()
+
+                if records_count > 0:
+                    INGESTION_RECORDS_TOTAL.labels(status="success").inc(records_count)
+                    logger.info(f"Ingestion complete. Processed {records_count} records.")
+                else:
+                    logger.info("API returned data but all records were duplicates.")
+
+        # Update timestamp on successful API call (even if no new data)
+        # This confirms pipeline is healthy and up-to-date
+        if api_call_successful:
+            update_last_success_timestamp()
 
     except Exception:
         logger.error("Ingestion process failed.", exc_info=True)

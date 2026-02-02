@@ -27,7 +27,6 @@ services:
       - POSTGRES_USER=esios
       - POSTGRES_PASSWORD=password
       - POSTGRES_DB=esios_db
-      
       - ESIOS_API_KEY=${ESIOS_API_KEY}
       - LOG_LEVEL=INFO
     ports:
@@ -43,5 +42,24 @@ services:
       --lifespan on
       --reload
 
+  prometheus:
+    image: prom/prometheus:v2.48.0
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--web.enable-lifecycle'
+      - '--storage.tsdb.retention.time=15d'
+    depends_on:
+      - api
+    restart: unless-stopped
+
 volumes:
   postgres_data:
+  prometheus_data:

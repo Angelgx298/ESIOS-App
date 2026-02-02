@@ -8,6 +8,7 @@ from tenacity import retry, stop_after_attempt, wait_fixed
 
 from esios_ingestor.core.database import Base, engine, get_db
 from esios_ingestor.core.logger import setup_logging
+from esios_ingestor.core.metrics import setup_instrumentator
 from esios_ingestor.web.routes import router as prices_router
 
 logger = logging.getLogger(__name__)
@@ -43,6 +44,9 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(title="Esios Ingestor API", lifespan=lifespan)
+
+# Setup Prometheus instrumentation
+setup_instrumentator(app)
 
 app.include_router(prices_router)
 

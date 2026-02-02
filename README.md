@@ -29,11 +29,13 @@ ETL pipeline and REST API for ingesting electricity prices from the Spanish elec
 * **Connection pooling** – SQLAlchemy pool configuration (size=10, max_overflow=20) for high concurrency
 * **Health checks** – Real database connectivity verification with appropriate HTTP status codes
 * **Structured logging** – Application lifecycle events (startup/shutdown) for observability
+* **Prometheus metrics** – HTTP latency tracking (p50/p95/p99) via /metrics endpoint
 
 ### CLI Interface
 
 * `esios ingest` – Trigger ETL pipeline
 * `esios prices` – Display prices in formatted table
+* `esios server` – Start FastAPI web server
 
 ## Technical Stack
 
@@ -46,6 +48,7 @@ ETL pipeline and REST API for ingesting electricity prices from the Spanish elec
 | ORM              | SQLAlchemy (async) | Non-blocking I/O for concurrent requests      |
 | Validation       | Pydantic V2        | Runtime type checking, data contracts         |
 | Testing          | pytest + httpx     | Async test support, integration tests         |
+| Observability    | Prometheus         | Metrics collection, p99 latency tracking      |
 | Containerization | Docker Compose     | Reproducible development environment          |
 | CI/CD            | GitHub Actions     | Automated linting and testing                 |
 
@@ -79,9 +82,27 @@ curl "http://localhost:8000/prices?limit=24"
 curl "http://localhost:8000/prices/stats?days=7"
 curl "http://localhost:8000/health"
 curl "http://localhost:8000/ready"
+curl "http://localhost:8000/metrics"
 ```
 
 **Prices Response:**
+
+```json
+[
+  {
+    "timestamp": "2026-01-27T00:00:00Z",
+    "price": 58.85,
+    "zone_id": 8741
+  },
+  {
+    "timestamp": "2026-01-26T23:00:00Z",
+    "price": 71.82,
+    "zone_id": 8741
+  }
+]
+```
+
+**Statistics Response (`/prices/stats`):**
 
 ```json
 {
@@ -145,6 +166,33 @@ ab -n 1000 -c 10 http://localhost:8000/prices?limit=10
 * Idempotent upserts prevent duplicate data
 * Automatic gap detection enables incremental ingestion
 * Async DB operations handle concurrent API traffic
+
+## Observability
+
+### Prometheus Metrics
+
+The application exposes metrics at `/metrics` endpoint for monitoring:
+
+**HTTP Metrics (automatic):**
+* `http_request_duration_seconds` – Request latency with p50, p95, p99 histograms
+* `http_requests_total` – Total requests by method, status, and endpoint
+* `http_requests_inprogress` – Current requests being processed
+
+**Note:** HTTP metrics appear after the first request is made to any endpoint (lazy initialization).
+
+**Access Prometheus UI:**
+```bash
+open http://localhost:9090
+```
+
+**Example Queries:**
+```promql
+# p99 latency
+histogram_quantile(0.99, rate(http_request_duration_seconds_bucket[5m]))
+
+# Total requests per endpoint
+sum by (handler) (rate(http_requests_total[5m]))
+```
 
 ## Troubleshooting
 
