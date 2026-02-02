@@ -82,10 +82,13 @@ async def get_price_stats(
     peak_hour = peak_result.scalar()
 
     cheap_query = (
-        select(extract("hour", ElectricityPrice.timestamp))
+        select(
+            extract("hour", ElectricityPrice.timestamp).label("hour"),
+            func.avg(ElectricityPrice.price).label("avg_price"),
+        )
         .where(ElectricityPrice.timestamp >= cutoff_date)
         .group_by(extract("hour", ElectricityPrice.timestamp))
-        .order_by(func.avg(ElectricityPrice.price))
+        .order_by(func.avg(ElectricityPrice.price).asc())
         .limit(1)
     )
 
@@ -97,6 +100,6 @@ async def get_price_stats(
         "avg_price": round(float(stats.avg_price), 2) if stats.avg_price else None,
         "max_price": round(float(stats.max_price), 2) if stats.max_price else None,
         "min_price": round(float(stats.min_price), 2) if stats.min_price else None,
-        "peak_hour": int(peak_hour) if peak_hour else None,
-        "cheapest_hour": int(cheapest_hour) if cheapest_hour else None,
+        "peak_hour": int(peak_hour) if peak_hour is not None else None,
+        "cheapest_hour": int(cheapest_hour) if cheapest_hour is not None else None,
     }
