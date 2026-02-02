@@ -138,28 +138,32 @@ curl "http://localhost:8000/metrics"
 
 ## Performance Benchmarks
 
-| Metric                     | Value     | Notes                   |
-| -------------------------- | --------- | ----------------------- |
-| Initial ingestion (7 days) | ~14.8s    | 179 hourly records      |
-| Full year ingestion        | ~60s      | ~8,760 records          |
-| API latency (mean)         | 15ms      | <10 concurrent requests |
-| API latency (p99)          | 100ms     | Worst 1%                |
-| Throughput                 | 641 req/s | Async PostgreSQL        |
-| Database size (1 year)     | ~3.5 MB   | With indexes            |
-| Cold startup               | 7.5s      | Docker + PostgreSQL     |
-| Container build            | ~6s       | Layer caching enabled   |
+| Metric                     | Value     | Notes                               |
+| -------------------------- | --------- | ----------------------------------- |
+| Initial ingestion (7 days) | ~4-5s     | ~170 hourly records (API dependent) |
+| API latency (mean)         | ~20ms     | <10 concurrent requests             |
+| API latency (p95)          | ~25ms     | 95th percentile                     |
+| API latency (p99)          | ~50-200ms | Worst 1% (spikes during DB writes)  |
+| Throughput                 | ~500 req/s| Async PostgreSQL                    |
+| Database size              | ~10 MB    | Per year of data with indexes       |
+| Cold startup               | ~10s      | Docker + PostgreSQL + migrations    |
+| Container build            | ~15-30s   | From scratch (layer cached: ~5s)    |
 
 ### Load Testing Results
+
+Tested with Apache Bench (ab) on local Docker environment:
 
 ```bash
 ab -n 1000 -c 10 http://localhost:8000/prices?limit=10
 ```
 
-* Requests/sec: 641.48
-* Mean latency: 15.6 ms
-* p95: 16 ms
-* p99: 100 ms
+**Results:**
+* Requests/sec: ~513
+* Mean latency: ~19.5 ms
 * Failed requests: 0
+* 90% of requests served within ~25ms
+
+*Note: Performance varies based on hardware, network latency to ESIOS API, and database state.*
 
 ### Scalability
 
